@@ -210,16 +210,14 @@ class test_determine_tbd_calver_version_number(TestCase):
 
     def test__success__cut_a_release(self):
         try:
+            date = str(datetime.date.today()).replace("-", ".")
             tmp_dir = self._make_tmp_dir(__name__)
             dummy_file = os.path.join(tmp_dir, "foobat.txt")
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
             self._create_branch(__name__, "release/releasing-a-thing")
             version = self._determine_tbd_calver_version_number(__name__)
-            date = str(datetime.date.today()).replace("-", ".")
-            commit_hash = self._get_commit_hash(__name__)
-            expected_version = f"{date}.release.1"
-            self.assertEqual(expected_version, version)
+            self.assertEqual(f"{date}.release.1", version)
         finally:
             self._cleanup(__name__)
 
@@ -367,3 +365,85 @@ class test_determine_tbd_calver_version_number(TestCase):
         finally:
             self._cleanup(__name__)
 
+    def test__success__commit_twice_to_master_then_merge_feature_into_feture_then_main(self):
+        try:
+            date = str(datetime.date.today()).replace("-", ".")
+
+            # Create the repo
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            version = self._determine_tbd_calver_version_number(__name__) 
+            self.assertEqual(f"{date}.master.1", version)   
+            # Make a modification to master
+            Shell.execute_shell_command(f"echo 'barfoo' > {dummy_file}")
+            self._make_commit(__name__)
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(f"{date}.master.2", version)
+            # create the feature
+            self._create_branch(__name__, "feature/testing-a-thing")
+            Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
+            self._make_commit(__name__)
+            # Create the 2nd feature
+            self._create_branch(__name__, "feature/branching-off-feature")
+            Shell.execute_shell_command(f"echo 'blah blah' > {dummy_file}")
+            self._make_commit(__name__)
+            # Merge the feature into the feature
+            self._checkout_branch(__name__, "feature/testing-a-thing")
+            self._merge_branch(__name__, "feature/branching-off-feature")
+            # Check the version numbers
+            commit_hash = self._get_commit_hash(__name__)
+            expected_version = f"{date}.feature.{commit_hash[:7]}"
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(expected_version, version)
+            # Merge into master
+            self._checkout_branch(__name__, "master")
+            self._merge_branch(__name__, "feature/testing-a-thing")
+            # Check the version numbers
+            date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}.master.3"
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+
+    def test__success__patch_a_release_commit_to_release_then_patch_again(self):
+        try:
+            date = str(datetime.date.today()).replace("-", ".")
+            # Make the repo
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            # create the release
+            self._create_branch(__name__, "release/releasing-a-thing")
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(f"{date}.release.1", version)
+            # patch it
+            self._create_branch(__name__, "patch/pathing-a-thing")
+            Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
+            self._make_commit(__name__)
+            Shell.execute_shell_command(f"echo 'blah blach' > {dummy_file}")
+            self._make_commit(__name__)
+            self._checkout_branch(__name__, "release/releasing-a-thing")
+            self._merge_branch(__name__, "patch/pathing-a-thing")
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(f"{date}.release.2", version)
+            # Make a commit
+            Shell.execute_shell_command(f"echo 'blah bldsafach' > {dummy_file}")
+            self._make_commit(__name__)
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(f"{date}.release.3", version)
+            # Patch it again
+            self._create_branch(__name__, "patch/pathing-another-thing")
+            Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
+            self._make_commit(__name__)
+            Shell.execute_shell_command(f"echo 'blah blach' > {dummy_file}")
+            self._make_commit(__name__)
+            self._checkout_branch(__name__, "release/releasing-a-thing")
+            self._merge_branch(__name__, "patch/pathing-another-thing")
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(f"{date}.release.4", version)
+        finally:
+            self._cleanup(__name__)

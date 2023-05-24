@@ -74,49 +74,27 @@ set -x
 
 # Collect more information for the edge cases
 
+	# When a commit is made, the commit has parents marking the branches involved
+	# Typically, first perent represents the branch where the commit was originally made
+	# The first-parent flag allows us to filter out commit/merges which occurred on our branch
+	# as opposed to another branch
+	
+	FIRST_COMMIT=$(git log --pretty=tformat:"%h" --first-parent | tail -n 1)
+	MERGES_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --merges)
+	COMMIT_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --no-merges)
+	VERSION_COUNT=$((MERGES_COUNT + COMMIT_COUNT))
+
+	# =========================================================
+	# Special case #1: Committing directly to mainline or release
+	# =========================================================
 	# Normally we should not be committing directly to the integration branches (master/release)
 	# However there is a special case when we are allowed to have commits appear without merges
 	# For master, the initial commit on the branch 
 	# For release, when branching from master and inheriting that initial commit
 
-	if [[ "${BRANCH_TYPE}" == "${MAINLINE_BRANCH}" || "${BRANCH_TYPE}" == "release" ]]; then
-		if [[ "${IS_MERGE_COMMIT}" == "false" ]]; then
-			# If there is a merge, count the commits since the merge
-			# otherwise count the commits since the first commit
-			MOST_RECENT_MERGE=$(git log --merges -n 1)
-			FIRST_COMMIT=$(git log --pretty=tformat:"%h" | tail -n 1)
-			if [ -z "${MOST_RECENT_MERGE}" ]; then
-				MOST_RECENT_MERGE="${FIRST_COMMIT}"
-			fi
-			if [[ "${COMMIT_HASH}" != "${FIRST_COMMIT}" ]]; then
-				echo "WARNING: A regular (non-merge) commit is not allowed on a ${BRANCH_TYPE} type branch." >&2
-				echo "All commits made to this branch must be merge commits!" >&2
-			fi
-			# Count the commits from the anchor point
-			MERGE_COUNT=$(git rev-list ${MOST_RECENT_MERGE}..HEAD | wc -l)
-			# Increment the count as this version is the next one
-			MERGE_COUNT=$((MERGE_COUNT+1))
-		fi
-	fi
-
-	if [[ "${BRANCH_TYPE}" == "${MAINLINE_BRANCH}" && -z "${MERGE_COUNT}" ]]; then
-		# Count the number of merge commits since the previous day
-		# The first parent ref is typically set to the branch where the commit occurred
-		# The --first-parent flag allows us to filter so only commits made to this brnch show
-		MERGE_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --merges)
-		# Increment the count as the initial commit to master needs to count even though
-		# it is not a merge commit
-		MERGE_COUNT=$((MERGE_COUNT+1))
-
-	elif [[ "${BRANCH_TYPE}" == "release" && -z "${MERGE_COUNT}" ]]; then
-		# Determine when the branch was created
-		BRANCH_START_COMMIT=$(bash ${ROOT_DIR}/repo_inspection/determine_commit_where_branch_created.sh)
-		# Get a list of merge commits between the start of the branch and HEAD
-		MERGES_ON_BRANCH=$(git rev-list --first-parent "${BRANCH_START_COMMIT}"..HEAD)
-		# Count the number of merge commits between the start of the branch and HEAD
-		LINE_COUNT=$(echo "${MERGES_ON_BRANCH}" | wc -l)
-		# Increment the count as this version is the next one
-		MERGE_COUNT=$((LINE_COUNT+1))
+	if [[ "${COMMIT_HASH}" != "${FIRST_COMMIT}" ]]; then
+		echo "WARNING: A regular (non-merge) commit is not allowed on a ${BRANCH_TYPE} type branch." >&2
+		echo "All commits made to this branch must be merge commits!" >&2
 	fi
 
 # Set the version number
@@ -125,7 +103,7 @@ set -x
 		VERSION_NUMBER="${COMMIT_DATE_PRETTY}.${BRANCH_TYPE}.${COMMIT_HASH}"
 	elif [[ "${BRANCH_TYPE}" == "${MAINLINE_BRANCH}" || "${BRANCH_TYPE}" == "release" ]]; then
 		# Count the number of merge commits
-        VERSION_NUMBER="${COMMIT_DATE_PRETTY}.${BRANCH_TYPE}.${MERGE_COUNT}"
+        VERSION_NUMBER="${COMMIT_DATE_PRETTY}.${BRANCH_TYPE}.${VERSION_COUNT}"
 	fi
 
 	VERSION_REGEX="^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.(release|patch|${MAINLINE_BRANCH}|feature|bug)\.([a-z0-9]{7}|[0-9]+)$"
