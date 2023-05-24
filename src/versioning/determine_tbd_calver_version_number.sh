@@ -26,10 +26,9 @@ set -x
 # will increment with each merge that occurs on a given day.
 #
 
-	GIT_VERSION=$(git --version)
-
 # Collect information from the git client
 
+	GIT_VERSION=$(git --version)
 	BRANCH_NAME=$(git branch | grep "*" | awk '{print $2}')
 	BRANCH_TYPE=$(echo "${BRANCH_NAME}" | awk -F/ '{print $1}')
 	BRANCH_NAME_PART_COUNT=$(echo "${BRANCH_NAME}" | sed 's/\// /g' | wc -w)
