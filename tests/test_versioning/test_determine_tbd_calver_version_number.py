@@ -81,7 +81,7 @@ class test_determine_tbd_calver_version_number(TestCase):
 
     def _determine_tbd_calver_version_number(self, test_name):
         tmp_dir = self._get_repo_directory(test_name)
-        script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
+        script_path = os.path.join(self._get_src_dir(), "determine_tbd_calver_version_number.sh")
         result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
         version = result.Stdout.split(os.linesep)[0]
         return version

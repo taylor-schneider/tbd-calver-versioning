@@ -51,7 +51,7 @@ set -x
 	done
 	CURRENT_DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
-	ROOT_DIR=$(realpath "$CURRENT_DIR/../")
+	ROOT_DIR=$(realpath "$CURRENT_DIR")
 
 	IS_MERGE_COMMIT=$(bash "${ROOT_DIR}/repo_inspection/determine_if_commit_is_merge_commit.sh")
 
