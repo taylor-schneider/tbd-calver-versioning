@@ -75,7 +75,16 @@ class test_determine_tbd_calver_version_number(TestCase):
         repo_dir = self._get_repo_directory(test_name)
         Shell.execute_shell_command(f"git merge --no-ff -m 'Merge message' {source_branch}", cwd=repo_dir)
 
-        
+    # ============================================
+    # Functions for running scripts in the src/ dir
+    # ============================================  
+
+    def _determine_tbd_calver_version_number(self, test_name):
+        tmp_dir = self._get_repo_directory(test_name)
+        script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
+        result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
+        version = result.Stdout.split(os.linesep)[0]
+        return version
 
     # ============================================
     # Test Functions
@@ -87,9 +96,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             dummy_file = os.path.join(tmp_dir, "foobat.txt")
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}.master.1"
             self.assertEqual(expected_version, version)
@@ -104,9 +111,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._make_repo(__name__)
             Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
             self._make_commit(__name__)
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}.master.2"
             self.assertEqual(expected_version, version)
@@ -120,9 +125,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
             self._create_branch(__name__, "feature/testing-a-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             commit_hash = self._get_commit_hash(__name__)
             expected_version = f"{date}.feature.{commit_hash[:7]}"
@@ -137,9 +140,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
             self._create_branch(__name__, "bug/testing-a-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             commit_hash = self._get_commit_hash(__name__)
             expected_version = f"{date}.bug.{commit_hash[:7]}"
@@ -154,9 +155,8 @@ class test_determine_tbd_calver_version_number(TestCase):
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
             self._create_branch(__name__, "unsupporded/testing-a-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
             with self.assertRaises(Exception) as context:
-                result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
+                version = self._determine_tbd_calver_version_number(__name__)
             self.assertEqual(1, context.exception.__cause__.ExitCode)
             err_msg = 'The branch type unsupporded is not supported'
             self.assertEqual(err_msg, context.exception.__cause__.Stdout)
@@ -175,9 +175,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._make_commit(__name__)
             self._checkout_branch(__name__, "master")
             self._merge_branch(__name__,"feature/testing-a-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}.master.2"
             self.assertEqual(expected_version, version)
@@ -203,9 +201,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._checkout_branch(__name__, "master")
             self._merge_branch(__name__,"feature/testing-another-thing")
             # Check the version numebr
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}.master.3"
             self.assertEqual(expected_version, version)
@@ -219,9 +215,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
             self._create_branch(__name__, "release/releasing-a-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             commit_hash = self._get_commit_hash(__name__)
             expected_version = f"{date}.release.1"
@@ -239,9 +233,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._create_branch(__name__, "patch/pathing-a-thing")
             Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
             self._make_commit(__name__)
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             commit_hash = self._get_commit_hash(__name__)
             expected_version = f"{date}.patch.{commit_hash[:7]}"
@@ -261,9 +253,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._make_commit(__name__)
             self._checkout_branch(__name__, "release/releasing-a-thing")
             self._merge_branch(__name__, "patch/pathing-a-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             commit_hash = self._get_commit_hash(__name__)
             expected_version = f"{date}.release.2"
@@ -292,13 +282,49 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._make_commit(__name__)
             self._checkout_branch(__name__, "release/releasing-a-thing")
             self._merge_branch(__name__, "patch/pathing-another-thing")
-            script_path = os.path.join(self._get_src_dir(), "versioning", "determine_tbd_calver_version_number.sh")
-            result = Shell.execute_shell_command(f"bash {script_path}", cwd=tmp_dir)
-            version = result.Stdout.split(os.linesep)[0]
+            version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
             commit_hash = self._get_commit_hash(__name__)
             expected_version = f"{date}.release.3"
             self.assertEqual(expected_version, version)
         finally:
             self._cleanup(__name__)
-  
+ 
+    def test__success__patch_a_release_twice_and_merge_to_main(self):
+        try:
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            self._create_branch(__name__, "release/releasing-a-thing")
+            self._create_branch(__name__, "patch/pathing-a-thing")
+            Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
+            self._make_commit(__name__)
+            Shell.execute_shell_command(f"echo 'blah blach' > {dummy_file}")
+            self._make_commit(__name__)
+            self._checkout_branch(__name__, "release/releasing-a-thing")
+            self._merge_branch(__name__, "patch/pathing-a-thing")
+            self._create_branch(__name__, "patch/pathing-another-thing")
+            Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
+            self._make_commit(__name__)
+            Shell.execute_shell_command(f"echo 'blah blach' > {dummy_file}")
+            self._make_commit(__name__)
+            self._checkout_branch(__name__, "release/releasing-a-thing")
+            self._merge_branch(__name__, "patch/pathing-another-thing")
+            version = self._determine_tbd_calver_version_number(__name__)
+            date = str(datetime.date.today()).replace("-", ".")
+            commit_hash = self._get_commit_hash(__name__)
+            expected_version = f"{date}.release.3"
+            # Now merge the patches to main
+            self._checkout_branch(__name__, "master")
+            self._merge_branch(__name__, "patch/pathing-a-thing")
+            version = self._determine_tbd_calver_version_number(__name__)
+            expected_version = f"{date}.master.2"
+            self.assertEqual(expected_version, version)
+            self._merge_branch(__name__, "patch/pathing-another-thing")
+            version = self._determine_tbd_calver_version_number(__name__)
+            expected_version = f"{date}.master.3"
+            self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+   
