@@ -37,7 +37,7 @@ set -x
 	COMMIT_DATE_PRETTY=$(date -d "${COMMIT_DATE}" +'%Y.%m.%d')
 	PREVIOUS_DATE=$(date -d "${COMMIT_DATE} -1 days" +'%Y-%m-%d')
 	if [ -z "${MAINLINE_BRANCH}" ]; then
-		MAINLINE_BRANCH=master
+		export MAINLINE_BRANCH=master
 	fi
 
 # Determine if we are dealing with a merge commit (likely a merge request or pull request)
@@ -51,10 +51,9 @@ set -x
 	done
 	CURRENT_DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
-	ROOT_DIR=$(realpath "$CURRENT_DIR/../../")
-	SCRIPT_DIR="${ROOT_DIR}/scripts"
+	ROOT_DIR=$(realpath "$CURRENT_DIR/../")
 
-	IS_MERGE_COMMIT=$(bash "${SCRIPT_DIR}/repo_inspection/determine_if_commit_is_merge_commit.sh")
+	IS_MERGE_COMMIT=$(bash "${ROOT_DIR}/repo_inspection/determine_if_commit_is_merge_commit.sh")
 
 # Validate the information we collected and raise an exception if something doesnt look right
 
@@ -108,7 +107,7 @@ set -x
 
 	elif [[ "${BRANCH_TYPE}" == "release" && -z "${MERGE_COUNT}" ]]; then
 		# Determine when the branch was created
-		BRANCH_START_COMMIT=$(bash ${SCRIPT_DIR}/repo_inspection/determine_commit_where_branch_created.sh)
+		BRANCH_START_COMMIT=$(bash ${ROOT_DIR}/repo_inspection/determine_commit_where_branch_created.sh)
 		# Get a list of merge commits between the start of the branch and HEAD
 		MERGES_ON_BRANCH=$(git rev-list --min-parents=2 --max-parents=2 "${BRANCH_START_COMMIT}"..HEAD)
 		# Count the number of merge commits between the start of the branch and HEAD
