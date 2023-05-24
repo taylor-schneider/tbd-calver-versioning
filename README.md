@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains an executable script, and accompanying library, which deterministically determines the version number of a git repository.
+This repository contains an executable script, and optionally, a python function which deterministically determines the version number of a git repository.
 
 The logic assumes the repository is following the Trunk Based Development branching strategy:
 
@@ -37,3 +37,8 @@ Examples include:
 ## Requirements
 - BASH >= 4.2
 - git >= 1.8
+
+## Installation
+The scripts can be installed by themselves (i.e. without a python dependency) by running the [install.sh](scripts/install.sh) found in the `scrips/` directory. This script will copy the scripts to the `/usr/local/bin` and the libraries to `/usr/local/<directory-name>` paths.
+
+The python package (and the scripts) can be installed by installing the pip package. The [setup.py](setup.py) is configured to copy the bash scripts to the same place as the `install.sh`. It will also install a python module which hosts a function. Once installed, the module can be imported and the function can be run. The function in turn calls the installed bash scripts.
