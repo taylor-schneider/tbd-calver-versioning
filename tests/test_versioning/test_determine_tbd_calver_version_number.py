@@ -51,7 +51,7 @@ class test_determine_tbd_calver_version_number(TestCase):
     def _make_commit(self, test_name):
         repo_dir = self._get_repo_directory(test_name)
         Shell.execute_shell_command("git add --all", cwd=repo_dir)
-        Shell.execute_shell_command("git commit -m 'initial checkin'", cwd=repo_dir) 
+        Shell.execute_shell_command("git commit -m 'making a commit'", cwd=repo_dir) 
     
     def _make_repo(self, test_name):
         repo_dir = self._get_repo_directory(test_name)
@@ -327,4 +327,43 @@ class test_determine_tbd_calver_version_number(TestCase):
             self.assertEqual(expected_version, version)
         finally:
             self._cleanup(__name__)
-   
+
+    # ============================================
+    # Test Functions - for wierd situations
+    # ============================================
+
+    def test__success__merge_feature_into_feture_then_main(self):
+        try:
+            # Create the repo
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            # create the feature
+            self._create_branch(__name__, "feature/testing-a-thing")
+            Shell.execute_shell_command(f"echo 'blah' > {dummy_file}")
+            self._make_commit(__name__)
+            # Create the 2nd feature
+            self._create_branch(__name__, "feature/branching-off-feature")
+            Shell.execute_shell_command(f"echo 'blah blah' > {dummy_file}")
+            self._make_commit(__name__)
+            # Merge the feature into the feature
+            self._checkout_branch(__name__, "feature/testing-a-thing")
+            self._merge_branch(__name__, "feature/branching-off-feature")
+            # Check the version numbers
+            date = str(datetime.date.today()).replace("-", ".")
+            commit_hash = self._get_commit_hash(__name__)
+            expected_version = f"{date}.feature.{commit_hash[:7]}"
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(expected_version, version)
+            # Merge into master
+            self._checkout_branch(__name__, "master")
+            self._merge_branch(__name__, "feature/testing-a-thing")
+            # Check the version numbers
+            date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}.master.2"
+            version = self._determine_tbd_calver_version_number(__name__)
+            self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+

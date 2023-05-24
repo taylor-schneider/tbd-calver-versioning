@@ -101,19 +101,22 @@ set -x
 
 	if [[ "${BRANCH_TYPE}" == "${MAINLINE_BRANCH}" && -z "${MERGE_COUNT}" ]]; then
 		# Count the number of merge commits since the previous day
-		MERGE_COUNT=$(git rev-list --count HEAD --since=${PREVIOUS_DATE} --merges)
-		# Increment the count as this version is the next one
+		# The first parent ref is typically set to the branch where the commit occurred
+		# The --first-parent flag allows us to filter so only commits made to this brnch show
+		MERGE_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --merges)
+		# Increment the count as the initial commit to master needs to count even though
+		# it is not a merge commit
 		MERGE_COUNT=$((MERGE_COUNT+1))
 
 	elif [[ "${BRANCH_TYPE}" == "release" && -z "${MERGE_COUNT}" ]]; then
 		# Determine when the branch was created
 		BRANCH_START_COMMIT=$(bash ${ROOT_DIR}/repo_inspection/determine_commit_where_branch_created.sh)
 		# Get a list of merge commits between the start of the branch and HEAD
-		MERGES_ON_BRANCH=$(git rev-list --min-parents=2 --max-parents=2 "${BRANCH_START_COMMIT}"..HEAD)
+		MERGES_ON_BRANCH=$(git rev-list --first-parent "${BRANCH_START_COMMIT}"..HEAD)
 		# Count the number of merge commits between the start of the branch and HEAD
-		MERGE_COUNT=$(echo "${MERGES_ON_BRANCH}" | wc -l)
+		LINE_COUNT=$(echo "${MERGES_ON_BRANCH}" | wc -l)
 		# Increment the count as this version is the next one
-                MERGE_COUNT=$((MERGE_COUNT+1))
+		MERGE_COUNT=$((LINE_COUNT+1))
 	fi
 
 # Set the version number
