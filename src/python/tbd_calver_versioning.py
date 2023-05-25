@@ -5,7 +5,7 @@ import os
 # This contains python functions which basically reimpliment the bash script logic
 # They make the same exact calls to the git cli and use the same logical structure
 
-def determine_version_number(repo_path=None):
+def determine_version_number(repo_path=None, adjust_for_pep_440=True):
     
     # Try to run code from the installed path first
     script_name = "determine_tbd_calver_version_number.sh"
@@ -20,4 +20,14 @@ def determine_version_number(repo_path=None):
         bash_dir = os.path.join(src_root_dir, "bash", "bin")
         script_path = os.path.join(bash_dir, script_name)
     
-    return Shell.execute_shell_command(f"bash {script_path}", cwd=repo_path).Stdout
+    version_number = Shell.execute_shell_command(f"bash {script_path}", cwd=repo_path).Stdout
+    
+    # With PEP 440 version specifier is `<public identifier>[+<local label>]`
+    # This means we need to adjsut our version number to use a + rather than a .
+    # for the fourth element in the version number
+    
+    if adjust_for_pep_440:
+        parts = version_number.split(".")
+        version_number = ".".join(parts[:3]) + "+" + F"{parts[3]}.{parts[4]}"
+    
+    return version_number

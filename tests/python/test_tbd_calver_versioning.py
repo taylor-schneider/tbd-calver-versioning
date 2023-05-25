@@ -96,6 +96,19 @@ class test_determine_tbd_calver_version_number(TestCase):
             self._make_repo(__name__)
             version = self._determine_tbd_calver_version_number(__name__)
             date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}+master.1"
+            self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+
+    def test__success__script_called_from_repo_without_pep_440(self):
+        try:
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            version = tbd_calver_versioning.determine_version_number(tmp_dir, adjust_for_pep_440=False)
+            date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}.master.1"
             self.assertEqual(expected_version, version)
         finally:

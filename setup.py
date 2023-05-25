@@ -44,7 +44,7 @@ logging.debug(json.dumps(bash_files, indent=4))
 
 
 # Run the setuptools setup function to install our code
-package_name = "tbd-calver-versioning-scripts"
+package_name = "tbd-calver-versioning"
 setuptools.setup(
     name=package_name,
     version="1.0.0",
