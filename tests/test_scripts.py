@@ -13,7 +13,7 @@ class test_scripts(TestCase):
         self.assertTrue(os.path.exists(script_path))
         version_number = Shell.execute_shell_command(f"bash {script_path}")
         self.assertIsNotNone(version_number)
-        
+     
     def test_uninstall(self):
         tests_dir = os.path.dirname(os.path.abspath(__file__))
         root_dir = os.path.dirname(tests_dir)
