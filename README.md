@@ -42,3 +42,8 @@ Examples include:
 The scripts can be installed by themselves (i.e. without a python dependency) by running the [install.sh](scripts/install.sh) found in the `scrips/` directory. This script will copy the scripts to the `/usr/local/bin` and the libraries to `/usr/local/<directory-name>` paths.
 
 The python package (and the scripts) can be installed by installing the pip package. The [setup.py](setup.py) is configured to copy the bash scripts to the same place as the `install.sh`. It will also install a python module which hosts a function. Once installed, the module can be imported and the function can be run. The function in turn calls the installed bash scripts.
+
+# Usage
+Once installed, simply navigate the current working directory to be inside a git repository and run the bash script or call the python function to determine the version number.
+
+TODO: In a future release a flag will be added to allow inspecting repositories by specifying a path rather than manipulating the CWD.
