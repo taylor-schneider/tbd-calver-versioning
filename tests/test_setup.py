@@ -2,6 +2,11 @@ from ShellUtilities import Shell
 import os
 from unittest import TestCase
 import tempfile
+import logging
+import datetime
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class test_scripts(TestCase):
@@ -76,43 +81,49 @@ class test_scripts(TestCase):
 
     def test_calling_module_function_from_cli(self):
         tests_dir = os.path.dirname(os.path.abspath(__file__))
-        root_dir = os.path.dirname(tests_dir)        
-        Shell.execute_shell_command(f"pip install .", cwd=root_dir)
-        shell_command = 'python3 -c "import tbd_calver_versioning; print(tbd_calver_versioning.determine_version_number())"'
-        Shell.execute_shell_command(shell_command)
-        Shell.execute_shell_command(f"pip uninstall -y tbd-calver-versioning", cwd=root_dir)
+        root_dir = os.path.dirname(tests_dir) 
+        tmp_dir = self._make_tmp_dir(__name__)
+        try:
+            # Install the module       
+            Shell.execute_shell_command(f"pip install .", cwd=root_dir)
+            # Create a dummy repo
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            # Determine the version number
+            shell_command = 'python3 -c "import tbd_calver_versioning; print(tbd_calver_versioning.determine_version_number())"'
+            version_number = Shell.execute_shell_command(shell_command, cwd=tmp_dir).Stdout
+            date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}+master.1"
+            self.assertEqual(version_number, expected_version)
+        finally:
+            # Uninstall
+            Shell.execute_shell_command(f"pip uninstall -y tbd-calver-versioning", cwd=root_dir)
+            Shell.execute_shell_command(f"rm -rf {tmp_dir}")
 
     def test_calling_module_function_from_setup_py(self):
         tests_dir = os.path.dirname(os.path.abspath(__file__))
-        root_dir = os.path.dirname(tests_dir)  
-        repo_dir = self._make_tmp_dir(__name__)
+        root_dir = os.path.dirname(tests_dir) 
+        tmp_dir = self._make_tmp_dir(__name__)
         try:
-            # Install the module      
+            # Install the module       
             Shell.execute_shell_command(f"pip install .", cwd=root_dir)
-            shell_command = 'python3 -c "import tbd_calver_versioning; print(tbd_calver_versioning.determine_version_number())"'
-            a = Shell.execute_shell_command(shell_command)
-            # Create the dummy project
+            # Create the dummy repo
             dummy_setup_py = os.path.join(tests_dir, "dummy_files", "setup.py")
-            Shell.execute_shell_command(f"cp {dummy_setup_py} {repo_dir}/")
-            src_dir = os.path.join(repo_dir, 'src')
+            Shell.execute_shell_command(f"cp {dummy_setup_py} {tmp_dir}/")
+            src_dir = os.path.join(tmp_dir, 'src')
             Shell.execute_shell_command(f"mkdir {src_dir}")
             Shell.execute_shell_command(f"echo 'print(\"Hello, World!\")' > {src_dir}/test.py")
             Shell.execute_shell_command(f"touch {src_dir}/__init__.py")
             self._make_repo(__name__)
             # Ensure the project can still be imported
-            b = Shell.execute_shell_command(shell_command)
-            c = Shell.execute_shell_command(shell_command, cwd=repo_dir)
-            # Install the dummy project
-            Shell.execute_shell_command("pip install .", cwd=repo_dir)
-
-
-            # Ensure the correct version was installed
-            package_name = "DummyPackage"
-            result = Shell.execute_shell_command(r"pip list | grep " + package_name +" | awk '{print $2}'")
-            installed_version = result.Stdout.split(os.linesep)[0]
-            self.assertIsNotNone(installed_version)
+            shell_command = 'python3 -c "import tbd_calver_versioning; print(tbd_calver_versioning.determine_version_number())"'
+            version_number = Shell.execute_shell_command(shell_command, cwd=tmp_dir).Stdout
+            date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}+master.1"
+            self.assertEqual(version_number, expected_version)
         finally:
-            # Cleanup
-            Shell.execute_shell_command(f"pip uninstall -y DummyPackage", cwd=root_dir)
+            # Uninstall
             Shell.execute_shell_command(f"pip uninstall -y tbd-calver-versioning", cwd=root_dir)
-            Shell.execute_shell_command(f"rm -rf {repo_dir}")
+            Shell.execute_shell_command(f"rm -rf {tmp_dir}")
+

@@ -53,9 +53,12 @@ setuptools.setup(
     description="A set of tools to manage a code repository using trunk based development and CalVer.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(source_code_dir),
+#    packages=setuptools.find_packages(source_code_dir),
+    package_dir={
+        "": source_code_dir
+    },
     py_modules=[
-        "src/python/tbd_calver_versioning"
+        "tbd_calver_versioning"
     ],
     install_requires= install_requires,
     data_files = bash_files,
