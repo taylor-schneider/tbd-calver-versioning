@@ -5,10 +5,10 @@ set -x
 
 # Ensure required variables are set
 
-        if [ -z "${MAINLINE_BRANCH}" ]; then
-                echo "The mainline branch was not set. Please set the MAINLINE_BRANCH variable."
-                exit 1
-        fi
+	if [ -z "${MAINLINE_BRANCH}" ]; then
+		echo "The mainline branch was not set. Please set the MAINLINE_BRANCH variable."
+		exit 1
+	fi
 
 # Determine where we are
 
