@@ -2,6 +2,7 @@ import sys
 import setuptools
 import os
 import logging
+import tbd_calver_versioning
 
 logging.basicConfig(level=logging.DEBUG, filename="/tmp/foobar.log")
 
@@ -47,7 +48,7 @@ logging.debug(json.dumps(bash_files, indent=4))
 package_name = "tbd-calver-versioning"
 setuptools.setup(
     name=package_name,
-    version="1.0.0",
+    version=tbd_calver_versioning.determine_version_number(),
     author="tschneider",
     author_email="tschneider@live.com",
     description="A set of tools to manage a code repository using trunk based development and CalVer.",
