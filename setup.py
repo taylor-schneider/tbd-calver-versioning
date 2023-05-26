@@ -43,18 +43,28 @@ import json
 bash_files = get_data_paths_for_bash_files("src/bash")
 logging.debug(json.dumps(bash_files, indent=4))
 
+# Determine which versioning scheme to use
+VERSION_FOR_PYPY = None
+try:
+    VERSION_FOR_PYPY = os.environ['VERSION_FOR_PYPY']
+except Exception as e:
+    raise Exception("The environment variable VERSION_FOR_PYPY must be set to ensure the package is versioned correctly.")
 
+if VERSION_FOR_PYPY == "true":
+    version_number = tbd_calver_versioning.determine_version_number(adjust_for_pypi=True)
+else:
+    version_number = tbd_calver_versioning.determine_version_number()
+    
 # Run the setuptools setup function to install our code
 package_name = "tbd-calver-versioning"
 setuptools.setup(
     name=package_name,
-    version=tbd_calver_versioning.determine_version_number(),
+    version=version_number,
     author="tschneider",
     author_email="tschneider@live.com",
     description="A set of tools to manage a code repository using trunk based development and CalVer.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-#    packages=setuptools.find_packages(source_code_dir),
     package_dir={
         "": source_code_dir
     },
@@ -69,4 +79,5 @@ setuptools.setup(
         "LICENSE :: OSI APPROVED :: GNU GENERAL PUBLIC LICENSE V3 (GPLV3)",
         "Operating System :: OS Independent",
     ],
+    url="https://github.com/taylor-schneider/tbd-calver-versioning"
 )
