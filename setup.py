@@ -2,9 +2,17 @@ import sys
 import setuptools
 import os
 import logging
-import tbd_calver_versioning
+
+# Do some magic to import the module from the src/python dir
+import importlib.util
+current_dir = os.path.abspath(os.path.dirname(__file__))
+module_path = os.path.join(current_dir, "src", "python", "tbd_calver_versioning.py")
+spec = importlib.util.spec_from_file_location("tbd_calver_versioning", module_path)
+tbd_calver_versioning = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tbd_calver_versioning)
 
 logging.basicConfig(level=logging.DEBUG, filename="/tmp/foobar.log")
+
 
 # Read the text from the README
 with open('README.md', "r") as fh:
@@ -44,13 +52,13 @@ bash_files = get_data_paths_for_bash_files("src/bash")
 logging.debug(json.dumps(bash_files, indent=4))
 
 # Determine which versioning scheme to use
-VERSION_FOR_PYPY = None
+VERSION_FOR_PYPI = None
 try:
-    VERSION_FOR_PYPY = os.environ['VERSION_FOR_PYPY']
+    VERSION_FOR_PYPI = os.environ['VERSION_FOR_PYPI']
 except Exception as e:
-    raise Exception("The environment variable VERSION_FOR_PYPY must be set to ensure the package is versioned correctly.")
+    raise Exception("The environment variable VERSION_FOR_PYPI must be set to ensure the package is versioned correctly.")
 
-if VERSION_FOR_PYPY == "true":
+if VERSION_FOR_PYPI == "true":
     version_number = tbd_calver_versioning.determine_version_number(adjust_for_pypi=True)
 else:
     version_number = tbd_calver_versioning.determine_version_number()

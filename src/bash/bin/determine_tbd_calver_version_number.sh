@@ -80,9 +80,24 @@ set -x
 	# as opposed to another branch
 	
 	FIRST_COMMIT=$(git log --pretty=tformat:"%h" --first-parent | tail -n 1)
-	MERGES_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --merges)
-	COMMIT_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --no-merges)
-	VERSION_COUNT=$((MERGES_COUNT + COMMIT_COUNT))
+
+	# If we are on an integration branch we will consider all merges and commits
+	# but if we are on a non-integration branch we will only consider merges and commits
+	# that occur after the commit that created the branch. This means we need special logic 
+	# for the release branch and master branch.
+
+	if [[ "${BRANCH_TYPE}" == "release" ]]; then
+		COMMIT_WHERE_BRANCH_CREATED=$(bash "${ROOT_DIR}/repo_inspection/determine_commit_where_branch_created.sh")	
+		MERGES_COUNT=$(git rev-list --first-parent --count ${COMMIT_WHERE_BRANCH_CREATED}..HEAD --merges)
+		COMMIT_COUNT=$(git rev-list --first-parent --count ${COMMIT_WHERE_BRANCH_CREATED}..HEAD --no-merges)
+		VERSION_COUNT=$((MERGES_COUNT + COMMIT_COUNT + 1)) 
+		# Note: We add one because the revlist command above does not include the commit in question
+	elif [[ "${BRANCH_TYPE}" == "master" ]]; then
+		MERGES_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --merges)
+		COMMIT_COUNT=$(git rev-list --first-parent --count HEAD --since=${PREVIOUS_DATE} --no-merges)
+		VERSION_COUNT=$((MERGES_COUNT + COMMIT_COUNT))
+	fi
+
 
 	# =========================================================
 	# Special case #1: Committing directly to mainline or release
