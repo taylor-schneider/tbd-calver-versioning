@@ -34,16 +34,16 @@ The logic to construct the version number assumes the repository is following th
 Branch Type                                  Branch Flow
 ==================================================================
 
-release/*                          -------------        --------
-                                 /   \       /        /
-patch/*                         /      -----         /
-                               /                    /
+release/*                          -------------          --------
+                                 /   \       /          /
+patch/*                         /      -----           /
+                               /             \        /
 master                    --------------------------------------------
-(aka. main, integration)     \ \               /\          /
-                              \ \             /  \        /
-feature/*                      \  -----------     \      /
-                                \                  \    /
-bug/*                             ----------------------
+(aka. main, integration)     \ \                 /\          /
+                              \ \               /  \        /
+feature/*                      \  --------------    \      /
+                                \                    \    /
+bug/*                             ------------------------
 
 ```
 
