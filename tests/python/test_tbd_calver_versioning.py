@@ -94,7 +94,7 @@ class test_determine_tbd_calver_version_number(TestCase):
             dummy_file = os.path.join(tmp_dir, "foobat.txt")
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
             self._make_repo(__name__)
-            version = self._determine_tbd_calver_version_number(__name__)
+            version = tbd_calver_versioning.determine_version_number(tmp_dir)
             date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}+master.1"
             self.assertEqual(expected_version, version)
@@ -111,5 +111,47 @@ class test_determine_tbd_calver_version_number(TestCase):
             date = str(datetime.date.today()).replace("-", ".")
             expected_version = f"{date}.master.1"
             self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+            
+    def test__success__script_called_from_repo_with_pypi_adjust(self):
+        try:
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            version = tbd_calver_versioning.determine_version_number(tmp_dir, adjust_for_pypi=True)
+            date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}.rc1"
+            self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+    
+    def test__success__script_called_from_repo_with_pypi_adjust_release(self):
+        try:
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            self._create_branch(__name__, "release/2021-12-12")
+            version = tbd_calver_versioning.determine_version_number(tmp_dir, adjust_for_pypi=True)
+            date = str(datetime.date.today()).replace("-", ".")
+            expected_version = f"{date}.1"
+            self.assertEqual(expected_version, version)
+        finally:
+            self._cleanup(__name__)
+            
+    def test__success__script_called_from_repo_with_pypi_adjust_feature(self):
+        try:
+            tmp_dir = self._make_tmp_dir(__name__)
+            dummy_file = os.path.join(tmp_dir, "foobat.txt")
+            Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
+            self._make_repo(__name__)
+            self._create_branch(__name__, "feature/blah-blah")
+            with self.assertRaises(Exception) as context:
+                version = tbd_calver_versioning.determine_version_number(tmp_dir, adjust_for_pypi=True)
+            self.assertIn("PEP 440", context.exception.args[0])
+            self.assertIn("pypi", context.exception.args[0])
+
         finally:
             self._cleanup(__name__)
