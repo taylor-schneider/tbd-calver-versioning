@@ -1,37 +1,35 @@
 #!/bin/bash
 
+# Overview:
+#     This script will do some git-magic to find the first commit on a branch
+#     This magic is done using the git rev-list command (which is not subject to ref log expiration)
+#
+# Explanation:
+#     We basically get a list of commits on the mainline/integration branch and a list of commits on our non-mainline
+#     We then diff the lists to generate a list of commits that are in the non-mainline but not mainline
+#     We then take the last item (earliers) from this list
+#
+# Assumptions:
+#     This command script assumes you are currently checked out on a branch
+#
+# Credits:
+#     https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
+
 set -e
 set -x
 
-# Ensure required variables are set
+# Ensure environment variables are set
 
 	if [ -z "${MAINLINE_BRANCH}" ]; then
-		echo "The mainline branch was not set. Please set the MAINLINE_BRANCH variable."
+		echo "The mainline branch name was not set."
 		exit 1
 	fi
 
-# Determine where we are
+# Do some magic to diff the two revision lists
 
-	CURRENT_DIR=$(realpath $(dirname $0))
-	CURRENT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+	FISRT_COMMIT_ON_BRANCH=$( diff --old-line-format='' --new-line-format='' \
+		<(git rev-list --first-parent "${1:-${MAINLINE_BRANCH}}") \
+	        <(git rev-list --first-parent "${2:-HEAD}") | head -1)
 
+	echo "${FISRT_COMMIT_ON_BRANCH=$}"
 
-# Inspect the repo
-
-	FIRST_COMMIT_ON_BRANCH=$(bash "${CURRENT_DIR}/determine_first_commit_on_branch.sh" )
-	if [ -z "${FIRST_COMMIT_ON_BRANCH}" ]; then
-		echo "The commit hash could not be determined"
-		exit 1
-	fi
-
-	#COMMIT_WHERE_BRANCH_STARTED=$(git rev-list "${FIRST_COMMIT_ON_BRANCH}"~1 | head -n 1)
-	COMMIT_WHERE_BRANCH_STARTED=$(git rev-list "${FIRST_COMMIT_ON_BRANCH}..HEAD" | tail -n 1)
-	
-	if [ -z "${COMMIT_WHERE_BRANCH_STARTED}" ]; then
-	        echo "The commit hash could not be determined"
-	        exit 1
-	fi
-
-# Return the result to stdout
-
-	echo "${COMMIT_WHERE_BRANCH_STARTED}"

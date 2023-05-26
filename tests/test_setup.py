@@ -40,9 +40,9 @@ class test_scripts(TestCase):
         Shell.execute_shell_command(f"yes | cp -R {src_glob} {tmp_glob}")
     
     def _cleanup(self, test_name):
-        test_dir = self._get_repo_directory(test_name)
-        Shell.execute_shell_command(f"rm -rf {test_dir}")
-        self.assertFalse(os.path.exists(test_dir))
+        tmp_dir = self._get_repo_directory(test_name)
+        Shell.execute_shell_command(f"pip uninstall -y tbd-calver-versioning")
+        Shell.execute_shell_command(f"rm -rf {tmp_dir}")
     
     # ============================================
     # Functions related to git
@@ -85,7 +85,7 @@ class test_scripts(TestCase):
         tmp_dir = self._make_tmp_dir(__name__)
         try:
             # Install the module       
-            Shell.execute_shell_command(f"pip install .", cwd=root_dir)
+            Shell.execute_shell_command(f"pip install .", cwd=root_dir, env={"VERSION_FOR_PYPI": "true"})
             # Create a dummy repo
             dummy_file = os.path.join(tmp_dir, "foobat.txt")
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
@@ -97,9 +97,7 @@ class test_scripts(TestCase):
             expected_version = f"{date}+master.1"
             self.assertEqual(version_number, expected_version)
         finally:
-            # Uninstall
-            Shell.execute_shell_command(f"pip uninstall -y tbd-calver-versioning", cwd=root_dir)
-            Shell.execute_shell_command(f"rm -rf {tmp_dir}")
+            self._cleanup(__name__)
 
     def test_calling_module_function_from_setup_py(self):
         tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -107,7 +105,7 @@ class test_scripts(TestCase):
         tmp_dir = self._make_tmp_dir(__name__)
         try:
             # Install the module       
-            Shell.execute_shell_command(f"pip install .", cwd=root_dir)
+            Shell.execute_shell_command(f"pip install .", cwd=root_dir, env={"VERSION_FOR_PYPI": "true"})
             # Create the dummy repo
             dummy_setup_py = os.path.join(tests_dir, "dummy_files", "setup.py")
             Shell.execute_shell_command(f"cp {dummy_setup_py} {tmp_dir}/")
@@ -123,7 +121,5 @@ class test_scripts(TestCase):
             expected_version = f"{date}+master.1"
             self.assertEqual(version_number, expected_version)
         finally:
-            # Uninstall
-            Shell.execute_shell_command(f"pip uninstall -y tbd-calver-versioning", cwd=root_dir)
-            Shell.execute_shell_command(f"rm -rf {tmp_dir}")
+            self._cleanup(__name__)
 
