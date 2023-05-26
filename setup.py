@@ -74,9 +74,9 @@ setuptools.setup(
     install_requires= install_requires,
     data_files = bash_files,
     classifiers=[
-        "Programming Language :: Python :: BASH",
+        "Programming Language :: Unix Shell",
         "Programming Language :: Python :: 3",
-        "LICENSE :: OSI APPROVED :: GNU GENERAL PUBLIC LICENSE V3 (GPLV3)",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ],
     url="https://github.com/taylor-schneider/tbd-calver-versioning"
