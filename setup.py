@@ -65,7 +65,6 @@ setuptools.setup(
     description="A set of tools to manage a code repository using trunk based development and CalVer.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-#    packages=setuptools.find_packages(source_code_dir),
     package_dir={
         "": source_code_dir
     },
@@ -80,4 +79,5 @@ setuptools.setup(
         "LICENSE :: OSI APPROVED :: GNU GENERAL PUBLIC LICENSE V3 (GPLV3)",
         "Operating System :: OS Independent",
     ],
+    url="https://github.com/taylor-schneider/tbd-calver-versioning"
 )

@@ -5,7 +5,7 @@ set -x
 
 # By default we will build packages and version them for pypi
 if [ -z "${VERSION_FOR_PYPY}" ]; then
-    VERSION_FOR_PYPY=true
+    export VERSION_FOR_PYPY=true
 fi
 
 python3 -m pip install wheel twine
