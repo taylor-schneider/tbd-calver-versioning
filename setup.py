@@ -25,8 +25,14 @@ with open('README.md', "r") as fh:
 # Set the directory for the source code to be installed
 source_code_dir = "src/python"
 
-# The data_files functionality allows us to copy files into to the /usr/local directory
-# We will provide a dictionary with relative destination path and the contents from the local path
+# The data_files functionality allows us to copy local files into to the /usr/local directory
+# or a new or existing sub directory by specifying a list of key value pairs.
+# The key is the directory name (inside /usr/local) and the value is the relative file path
+# we want copied.
+# 
+# The magic here is that we can copy executable scripts into the existing /usr/local/bin directory
+# which affectively allows us to install programs and utilities.
+#
 
 def get_data_paths_for_bash_files(source_code_dir):
     bash_files = {}

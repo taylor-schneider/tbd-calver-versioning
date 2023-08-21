@@ -62,9 +62,15 @@ Examples include:
 - git >= 1.8
 
 ## Installation
-The scripts can be installed by themselves (i.e. without a python dependency) by running the [install.sh](scripts/install.sh) found in the `scrips/` directory. This script will copy the scripts to the `/usr/local/bin` and the libraries to `/usr/local/<directory-name>` paths.
+There are two options for installing the utilities in this repository:
+- bash scripts only (no python dependency)
+- python module and bash scipts
+
+The bash scripts can be installed by themselves (i.e. without a python dependency) by running the [install.sh](scripts/install.sh) found in the `scrips/` directory of this repository. This script will copy the scripts from the git repo to the `/usr/local/bin` and the libraries to `/usr/local/<directory-name>` paths.
 
 The python package (and the scripts) can be installed by installing the pip package. The [setup.py](setup.py) is configured to copy the bash scripts to the same place as the `install.sh`. It will also install a python module which hosts a function. Once installed, the module can be imported and the function can be run. The function in turn calls the installed bash scripts.
+
+**NOTE**: If using conda, the bin path will automagically change to a conda env path. As such the paths of the installed scripts may differ depending on whether one used the install.sh or the pip install method.
 
 # Usage
 Once installed, simply navigate the current working directory to be inside a git repository and run the bash script or call the python function to determine the version number for that repository.

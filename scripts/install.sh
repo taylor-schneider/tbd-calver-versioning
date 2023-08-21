@@ -8,6 +8,6 @@ ROOT_DIR=$(dirname $CURRENT_DIR)
 SRC_DIR="${ROOT_DIR}/src"
 BASH_DIR="${SRC_DIR}/bash"
 
-# Install the scripts
+# Install the bash scripts by copying them to the /usr/local/bin directory
 cp -R ${BASH_DIR}/repo_inspection "/usr/local/"
 ls "${BASH_DIR}/bin/" | xargs -I {} cp "${BASH_DIR}/bin/{}" /usr/local/bin/
