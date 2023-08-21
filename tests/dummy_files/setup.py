@@ -12,10 +12,6 @@ logging.debug(sys.path)
 logging.debug(sys.executable)
 logging.debug("=====================")
 
-install_requires = [
-    "tbd-calver-versioning"
-]
-
 if sys.version_info < (3, 0):
     install_requires.append("future")
 
@@ -33,7 +29,6 @@ setuptools.setup(
     package_dir={
         "": source_code_dir
     },
-    install_requires= install_requires,
     classifiers=[
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",

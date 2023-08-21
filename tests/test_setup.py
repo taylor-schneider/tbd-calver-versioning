@@ -84,8 +84,12 @@ class test_scripts(TestCase):
         root_dir = os.path.dirname(tests_dir) 
         tmp_dir = self._make_tmp_dir(__name__)
         try:
-            # Install the module       
-            Shell.execute_shell_command(f"pip install .", cwd=root_dir, env={"VERSION_FOR_PYPI": "true"})
+            # Install the module
+            Shell.execute_shell_command("which pip")
+            Shell.execute_shell_command("pip --version")
+            env = os.environ.copy()
+            env["VERSION_FOR_PYPI"] = "false"
+            Shell.execute_shell_command("pip install .", cwd=root_dir, env=env)
             # Create a dummy repo
             dummy_file = os.path.join(tmp_dir, "foobat.txt")
             Shell.execute_shell_command(f"echo 'foobar' > {dummy_file}")
@@ -104,8 +108,10 @@ class test_scripts(TestCase):
         root_dir = os.path.dirname(tests_dir) 
         tmp_dir = self._make_tmp_dir(__name__)
         try:
-            # Install the module       
-            Shell.execute_shell_command(f"pip install .", cwd=root_dir, env={"VERSION_FOR_PYPI": "true"})
+            # Install the module 
+            env = os.environ.copy()
+            env["VERSION_FOR_PYPI"] = "false"     
+            Shell.execute_shell_command(f"pip install .", cwd=root_dir, env=env)
             # Create the dummy repo
             dummy_setup_py = os.path.join(tests_dir, "dummy_files", "setup.py")
             Shell.execute_shell_command(f"cp {dummy_setup_py} {tmp_dir}/")

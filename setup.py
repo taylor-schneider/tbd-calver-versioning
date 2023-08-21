@@ -1,9 +1,16 @@
-import sys
 import setuptools
 import os
 import logging
 
-# Do some magic to import the module from the src/python dir
+# Set the logging level
+logging.basicConfig(level=logging.DEBUG, filename="/tmp/tbd_calver_versioning.log")
+
+# Read the text from the requirements file
+with open('requirements.txt') as file:
+    lines = file.readlines()
+    install_requires = [line.rstrip() for line in lines]
+
+# Do some magic to import the tbd_calver_versioning module from the local src/python dir
 import importlib.util
 current_dir = os.path.abspath(os.path.dirname(__file__))
 module_path = os.path.join(current_dir, "src", "python", "tbd_calver_versioning.py")
@@ -11,17 +18,9 @@ spec = importlib.util.spec_from_file_location("tbd_calver_versioning", module_pa
 tbd_calver_versioning = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tbd_calver_versioning)
 
-logging.basicConfig(level=logging.DEBUG, filename="/tmp/foobar.log")
-
-
 # Read the text from the README
 with open('README.md', "r") as fh:
-    long_description = fh.read()
-
-# Read the text from the requirements file
-with open('requirements.txt') as file:
-    lines = file.readlines()
-    install_requires = [line.rstrip() for line in lines]   
+    long_description = fh.read()   
 
 # Set the directory for the source code to be installed
 source_code_dir = "src/python"
@@ -56,7 +55,8 @@ VERSION_FOR_PYPI = None
 try:
     VERSION_FOR_PYPI = os.environ['VERSION_FOR_PYPI']
 except Exception as e:
-    raise Exception("The environment variable VERSION_FOR_PYPI must be set to ensure the package is versioned correctly.")
+    logging.warning(f"The environment variable VERSION_FOR_PYPI was not set. Defaulting to 'false'.")
+    VERSION_FOR_PYPI="false"
 
 if VERSION_FOR_PYPI == "true":
     version_number = tbd_calver_versioning.determine_version_number(adjust_for_pypi=True)

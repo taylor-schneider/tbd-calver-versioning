@@ -1,11 +1,12 @@
 # Overview
 
-This repository contains several useful utilities:
+This repository contains several useful components:
 1. A [BASH script](src/bash/bin/determine_tbd_calver_version_number.sh) which determines the version number of a git repository
 2. A [python module](src/python/tbd_calver_versioning.py) which contains a function which calls the BASH script and then produces a PEP440 compliant version number.
 3. Scripts to [install](scripts/install.sh)/[uninstall](scripts/uninstall.sh) the BASH script, and accompanying libraries, to `/usr/local/bin`
 4. A [setup.py](setup.py) allowing this project to be installed as a pip package
-5. An [example Setup.py](tests/dummy_files/setup.py) showing how the python function can be called to version a package automatically.
+5. A [pyproject.toml](pyproject.toml) which will install prerequisite packages (ShellUtilities) before running the setup.py.
+6. An [example Setup.py](tests/dummy_files/setup.py) and [example pyproject.toml](tests/dummy_files/pyproject.toml) showing how a function in this python library can be called to version a package automatically as part of another project's setup.py.
 
 
 # Versioning
@@ -69,4 +70,4 @@ The python package (and the scripts) can be installed by installing the pip pack
 Once installed, simply navigate the current working directory to be inside a git repository and run the bash script or call the python function to determine the version number for that repository.
 
 # TODO
-In a future release a flag will be added to allow inspecting repositories by specifying a path rather than manipulating the CWD.
+- repo-flag: add a flag to allow inspecting repositories by specifying a path rather than manipulating the CWD.
