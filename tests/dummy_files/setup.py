@@ -29,7 +29,6 @@ setuptools.setup(
     package_dir={
         "": source_code_dir
     },
-    install_requires= install_requires,
     classifiers=[
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
