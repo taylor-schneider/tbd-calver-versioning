@@ -35,10 +35,10 @@ The logic to construct the version number assumes the repository is following th
 Branch Type                                  Branch Flow
 ==================================================================
 
-release/*                          -------------          --------
-                                 /   \       /          /
-patch/*                         /      -----           /
-                               /             \        /
+release/*                          -------------          ----------
+                                 /   \       /          /      / 
+patch/*                         /      -----           /      /
+                               /             \        /      /
 master                    --------------------------------------------
 (aka. main, integration)     \ \                 /\          /
                               \ \               /  \        /
@@ -56,6 +56,8 @@ Examples include:
 - 2023.05.23.master.1
 - 2022.12.01.feature.f3b24e1
 
+### Note On Merging
+When merging a non-integration branch into an integration branch we must ensure that there is a merge commit. If we allow the branch to simply fast forward, the logic for determining the version number cannot work. This is because a "branch" is simply a version history and if the version histories are identical between two branches, then our logic breaks. To fix this, use the --no-ff to force a merge commit. For example, if merging main up into a release branch, us the --no-ff to ensure a new merge commit is created on the release and guarantee the release number will be incremented properly.
 
 ## Requirements
 - BASH >= 4.2
